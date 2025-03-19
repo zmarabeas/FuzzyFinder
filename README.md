@@ -1,8 +1,8 @@
 # Fuzzy Finder
-## Pytorch powered image classification
+### Pytorch powered image classification
 ### Version 0.0.1
 
-A pytorch powered web app to classify sections of video with animals in them.
+A pytorch and svelte powered web app to classify sections of video with animals in them.
 
 TODO: 
 - [ ] Add more information about the project
