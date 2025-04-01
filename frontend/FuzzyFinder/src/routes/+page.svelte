@@ -9,6 +9,7 @@
 
 <script>
   import VideoUploader from '$lib/components/VideoUploader.svelte';
+  import VideoPlayer from '$lib/components/VideoPlayer.svelte';
   
   let videoFile = $state(null);
   let isVideoUploaded = $state(false);
@@ -39,13 +40,7 @@
       </div>
     {:else}
       <div class="video-player-container">
-        <div class="player-placeholder">
-          <!-- Video player component will go here -->
-          <div class="placeholder-text">
-            <h3>Video Player</h3>
-            <p>Filename: {videoFile.name}</p>
-          </div>
-        </div>
+        <VideoPlayer videoFile={videoFile} />
         
         <div class="upload-new-container">
           <button class="upload-new-btn" onclick={handleUploadNew}>
@@ -111,31 +106,108 @@
   .video-player-container {
     width: 100%;
     max-width: 800px;
-  }
-  
-  .player-placeholder {
-    background-color: #3f4045; /* onyx */
-    border-radius: 8px;
-    height: 450px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     margin-bottom: 1.5rem;
   }
   
-  .placeholder-text {
+  /* VideoUploader styles */
+  :global(.uploader-container) {
+    background-color: #3f4045; /* onyx */
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 3rem 2rem;
     text-align: center;
-    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative; /* Establish positioning context */
   }
   
-  .placeholder-text h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1.5rem;
+  :global(.drag-active) {
+    background-color: #413f54; /* english-violet */
+    border-color: #5f5aa2; /* ultra-violet */
+    transform: scale(1.01);
   }
   
-  .placeholder-text p {
+  :global(.file-input) {
+    display: none;
+  }
+  
+  :global(.upload-content) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    position: relative; /* For proper event bubbling */
+    z-index: 1; /* Ensure content is above overlay */
+    pointer-events: auto; /* Enable pointer events */
+  }
+  
+  :global(.upload-icon) {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.5rem;
+  }
+  
+  :global(.upload-content h3) {
     margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  
+  :global(.upload-content p) {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 80%;
+  }
+  
+  :global(.browse-btn) {
+    margin-top: 1.5rem;
+    background-color: #5f5aa2; /* ultra-violet */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
     font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative; /* For proper event bubbling */
+    z-index: 1; /* Ensure button is above overlay */
+  }
+  
+  :global(.browse-btn:hover) {
+    background-color: #355691; /* yinmn-blue */
+  }
+  
+  :global(.upload-progress-container) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  :global(.progress-bar-container) {
+    width: 100%;
+    max-width: 300px;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  :global(.progress-bar) {
+    height: 100%;
+    background-color: #5f5aa2; /* ultra-violet */
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  
+  :global(.error-message) {
+    color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    font-size: 0.875rem;
   }
   
   .upload-new-container {
