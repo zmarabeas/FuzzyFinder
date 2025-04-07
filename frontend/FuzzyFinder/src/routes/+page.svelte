@@ -1,15 +1,10 @@
-<!--
-  import { testServerFunction } from '$lib/functions';
-
-  {/* onMount(async () => { */}
-  {/*   const res = await testServerFunction(); */}
-  {/*   console.log(res); */}
-  {/* }); */}
--->
 
 <script>
   import VideoUploader from '$lib/components/VideoUploader.svelte';
   import VideoPlayer from '$lib/components/VideoPlayer.svelte';
+  import { testServerFunction, testServerHealth } from '$lib/functions';
+  import { FuzzyAPI } from '$lib/functions';
+  import { onMount } from 'svelte';
   
   let videoFile = $state(null);
   let isVideoUploaded = $state(false);
@@ -23,6 +18,18 @@
     videoFile = null;
     isVideoUploaded = false;
   }
+
+
+
+
+  const api = new FuzzyAPI();
+  onMount(async () => {
+    const res = await testServerFunction();
+    const health = await testServerHealth();
+    console.log(await api.getAvailableDetectors());
+    console.log(res);
+    console.log(health);
+  });
 </script>
 
 <main>
