@@ -9,6 +9,7 @@ import numpy as np
 from models.resnet_detector import ResNetDetector
 from models.yolo_detector import YOLODetector
 from models.temporal_detector import TemporalDetector
+from models.rcnn_detector import FasterRCNNDetector
 from utils.video_processor import extract_frames, find_animal_segments
 
 app = Flask(__name__)
@@ -24,8 +25,10 @@ def hello_world():
 DETECTORS = {
     'resnet': lambda: ResNetDetector(confidence_threshold=0.5),
     'yolo': lambda: YOLODetector(confidence_threshold=0.5),
+    'faster_rcnn': lambda: FasterRCNNDetector(confidence_threshold=0.5),
     'temporal_resnet': lambda: TemporalDetector(ResNetDetector(), sequence_length=5),
-    'temporal_yolo': lambda: TemporalDetector(YOLODetector(), sequence_length=5)
+    'temporal_yolo': lambda: TemporalDetector(YOLODetector(), sequence_length=5),
+    'temporal_faster_rcnn': lambda: TemporalDetector(FasterRCNNDetector(), sequence_length=5),
 }
 
 @app.route('/process-video', methods=['POST'])
@@ -59,6 +62,7 @@ def process_video():
         # Process each frame
         frame_results = []
         for i, frame in enumerate(video_data['frames']):
+            print(f'processing frame {i}/{video_data["frame_count"]}')
             result = detector.detect(frame)
             
             # Add frame metadata
@@ -102,4 +106,5 @@ def health():
     return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5005)
+    # app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(port=5005)
