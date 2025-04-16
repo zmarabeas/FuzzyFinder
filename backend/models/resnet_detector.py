@@ -12,7 +12,7 @@ class ResNetDetector(BaseDetector):
     def __init__(self, confidence_threshold=0.5):
         self.model = None
         self.transform = None
-        self.confidence_threshold = confidence_threshold
+        self.confidence_threshold = 0.3 #confidence_threshold
         self.imagenet_labels = None
         self._name = "resnet50"
         
@@ -86,9 +86,28 @@ class ResNetDetector(BaseDetector):
             'detections': detections
         }
     
+    # def _is_animal(self, label):
+    #     """Check if the label is an animal"""
+    #     return any(animal in label.lower() for animal in self.animal_classes)
     def _is_animal(self, label):
-        """Check if the label is an animal"""
-        return any(animal in label.lower() for animal in self.animal_classes)
+        # Extensive list of ImageNet animal-related classes
+        animal_classes = [
+            # Dog breeds (dozens in ImageNet)
+            'retriever', 'setter', 'terrier', 'hound', 'spaniel', 'bulldog', 'shepherd', 
+            'collie', 'poodle', 'beagle', 'boxer', 'dalmatian', 'chihuahua', 'pug',
+            # General animal categories
+            'cat', 'bird', 'horse', 'sheep', 'cow', 'elephant', 'bear', 
+            'zebra', 'giraffe', 'monkey', 'fish', 'lion', 'tiger',
+            # More generic terms
+            'animal', 'mammal', 'canine', 'feline', 'reptile', 'amphibian'
+        ] + self.animal_classes
+        
+        # Print debug info
+        # print(f"Checking label: {label}")
+        is_match = any(animal in label.lower() for animal in animal_classes)
+        # print(f"Is animal: {is_match}, confidence: {self.confidence_threshold}")
+        
+        return is_match
     
     @property
     def name(self):
