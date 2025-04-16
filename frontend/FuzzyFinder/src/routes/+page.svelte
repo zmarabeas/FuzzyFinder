@@ -8,33 +8,54 @@
 
   let videoFile = $state(null);
   let isVideoUploaded = $state(false);
-  let selectedModel = 'yolo';
+  let selectedModel = $state("yolo");
+  let processingVideo = $state(false);
+  let processedResults = $state(null);
+  let processingError = $state(null);
 
   const api = new FuzzyAPI();
 
   function handleFileUploaded(event) {
     videoFile = event.detail.file;
     isVideoUploaded = true;
+    // Clear previous results when a new video is uploaded
+    processedResults = null;
   }
 
   function handleUploadNew() {
     videoFile = null;
     isVideoUploaded = false;
+    processedResults = null;
+    processingError = null;
   }
 
   async function handleProcessVideo() {
-    console.log('processing video with: ', selectedModel);
-    const res = await api.processVideo(videoFile, selectedModel);
-    console.log(res);
+    console.log("processing video with: ", selectedModel);
+    processingVideo = true;
+    processingError = null;
+
+    try {
+      const results = await api.processVideo(videoFile, selectedModel);
+      console.log("Processing results:", results);
+      processedResults = results;
+    } catch (error) {
+      console.error("Error processing video:", error);
+      processingError = error.message || "Failed to process video";
+    } finally {
+      processingVideo = false;
+    }
   }
 
   onMount(async () => {
-    const res = await testServerFunction();
-    const health = await testServerHealth();
-    console.log(await api.getAvailableDetectors());
-    console.log(res);
-    console.log(health);
-    console.log(await api.processVideo());
+    // Test API connections
+    try {
+      const res = await testServerFunction();
+      const health = await testServerHealth();
+      const detectors = await api.getAvailableDetectors();
+      console.log("API connection successful", { res, health, detectors });
+    } catch (error) {
+      console.error("API connection error:", error);
+    }
   });
 </script>
 
@@ -53,22 +74,68 @@
       </div>
     {:else}
       <div class="video-player-container">
-        <VideoPlayer {videoFile} />
+        <VideoPlayer
+          {videoFile}
+          animalSegments={processedResults?.animal_segments || []}
+        />
 
         <div class="process-container">
-          <button class="upload-new-btn" onclick={handleProcessVideo}>
-            Process Video
-          </button>
+          <div class="model-section">
+            <ModelSelector bind:selectedModel />
+
+            <button
+              class="process-btn {processingVideo ? 'processing' : ''}"
+              onclick={handleProcessVideo}
+              disabled={processingVideo}
+            >
+              {#if processingVideo}
+                <span class="spinner-small"></span> Processing...
+              {:else}
+                Process Video
+              {/if}
+            </button>
+          </div>
+
+          {#if processingError}
+            <div class="error-message">
+              {processingError}
+            </div>
+          {/if}
+
+          {#if processedResults}
+            <div class="results-summary">
+              <h3>Processing Results</h3>
+              <div class="results-stats">
+                <div class="stat">
+                  <span class="stat-label">Detected Segments:</span>
+                  <span class="stat-value"
+                    >{processedResults.animal_segments.length}</span
+                  >
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Detector:</span>
+                  <span class="stat-value"
+                    >{processedResults.metadata.detector}</span
+                  >
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Video Duration:</span>
+                  <span class="stat-value"
+                    >{processedResults.metadata.duration.toFixed(2)}s</span
+                  >
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Frames Processed:</span>
+                  <span class="stat-value"
+                    >{processedResults.frames.length}</span
+                  >
+                </div>
+              </div>
+            </div>
+          {/if}
         </div>
 
-        <div class="select-container">
-          <ModelSelector bind:selectedModel/>
-
-        </div>
-
-        <div class="divider">-</div>
-
-
+        <div class="divider"></div>
 
         <div class="upload-new-container">
           <button class="upload-new-btn" onclick={handleUploadNew}>
@@ -134,7 +201,7 @@
     padding: 2rem;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
   }
 
   .upload-container {
@@ -148,59 +215,23 @@
     margin-bottom: 1.5rem;
   }
 
-  /* VideoUploader styles */
-  :global(.uploader-container) {
-    background-color: #3f4045; /* onyx */
-    border: 2px dashed rgba(255, 255, 255, 0.3);
+  .process-container {
+    margin-top: 20px;
+    background-color: #3f4045;
     border-radius: 8px;
-    padding: 3rem 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative; /* Establish positioning context */
+    padding: 16px;
   }
 
-  :global(.drag-active) {
-    background-color: #413f54; /* english-violet */
-    border-color: #5f5aa2; /* ultra-violet */
-    transform: scale(1.01);
-  }
-
-  :global(.file-input) {
-    display: none;
-  }
-
-  :global(.upload-content) {
+  .model-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    position: relative; /* For proper event bubbling */
-    z-index: 1; /* Ensure content is above overlay */
-    pointer-events: auto; /* Enable pointer events */
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
-  :global(.upload-icon) {
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 0.5rem;
-  }
-
-  :global(.upload-content h3) {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #ffffff;
-  }
-
-  :global(.upload-content p) {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.7);
-    max-width: 80%;
-  }
-
-  :global(.browse-btn) {
-    margin-top: 1.5rem;
-    background-color: #5f5aa2; /* ultra-violet */
+  .process-btn {
+    background-color: #5f5aa2;
     color: white;
     border: none;
     border-radius: 4px;
@@ -209,54 +240,92 @@
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    position: relative; /* For proper event bubbling */
-    z-index: 1; /* Ensure button is above overlay */
-  }
-
-  :global(.browse-btn:hover) {
-    background-color: #355691; /* yinmn-blue */
-  }
-
-  :global(.upload-progress-container) {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 8px;
+    height: 40px;
   }
 
-  :global(.progress-bar-container) {
-    width: 100%;
-    max-width: 300px;
-    height: 8px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    overflow: hidden;
+  .process-btn:hover:not(:disabled) {
+    background-color: #355691;
   }
 
-  :global(.progress-bar) {
-    height: 100%;
-    background-color: #5f5aa2; /* ultra-violet */
-    border-radius: 4px;
-    transition: width 0.3s ease;
+  .process-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 
-  :global(.error-message) {
-    color: #ff6b6b;
-    background-color: rgba(255, 107, 107, 0.1);
-    padding: 0.75rem 1rem;
+  .process-btn.processing {
+    background-color: #413f54;
+  }
+
+  .spinner-small {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  .error-message {
+    background-color: rgba(255, 99, 71, 0.2);
+    color: #ff6347;
+    padding: 12px;
     border-radius: 4px;
-    margin-top: 1rem;
-    font-size: 0.875rem;
+    margin-top: 12px;
+    font-size: 14px;
+  }
+
+  .results-summary {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .results-summary h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .results-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .stat {
+    background-color: #413f54;
+    padding: 12px;
+    border-radius: 4px;
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 24px 0;
   }
 
   .upload-new-container {
     display: flex;
-    margin-top: 15px;
     justify-content: center;
   }
 
   .upload-new-btn {
-    background-color: #5f5aa2; /* ultra-violet */
+    background-color: #5f5aa2;
     color: white;
     border: none;
     border-radius: 4px;
@@ -268,14 +337,16 @@
   }
 
   .upload-new-btn:hover {
-    background-color: #355691; /* yinmn-blue */
+    background-color: #355691;
   }
 
   footer {
-    background-color: #413f54; /* english-violet */
+    background-color: #413f54;
     padding: 1rem;
     text-align: center;
     font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.6);
   }
+
+  /* Add other styles from your original CSS here */
 </style>
