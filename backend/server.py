@@ -14,6 +14,7 @@ from models.rcnn_detector import FasterRCNNDetector
 from models.ssd_detector import SSDDetector
 from models.mobilenet_detector import MobileNetDetector
 from utils.video_processor import extract_frames, find_animal_segments
+from utils.youtube_downloader import download_youtube_video, InvalidYouTubeURLError, YouTubeDownloadError
 
 app = Flask(__name__)
 CORS(app)
@@ -120,11 +121,22 @@ def process_youtube():
         return jsonify({'error': 'Missing URL parameter'}), 400
 
     # TODO: download YouTube video, extract frames, and run detection using req.detector
+    try:
+        video_path = download_youtube_video(req.url)
+    except InvalidYouTubeURLError as e:
+        return jsonify({'error': str(e)}), 400
+    except YouTubeDownloadError as e:
+        return jsonify({'error': str(e)}), 502
+
+    # Placeholder: we have the video_path but detection not yet implemented
+    # Ensure temporary file is removed later
+    os.unlink(video_path)
+
     return jsonify({
-        'message': 'YouTube processing not implemented yet',
+        'message': 'YouTube video downloaded; detection pipeline not yet implemented',
         'url': req.url,
         'detector': req.detector
-    }), 501
+    }), 202
 
 @app.route('/available-detectors', methods=['GET'])
 def available_detectors():

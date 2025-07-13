@@ -2,6 +2,7 @@
   import VideoUploader from "$lib/components/VideoUploader.svelte";
   import VideoPlayer from "$lib/components/VideoPlayer.svelte";
   import ModelSelector from "$lib/components/ModelSelector.svelte";
+  import LoadingOverlay from "$lib/components/LoadingOverlay.svelte";
   import { testServerFunction, testServerHealth } from "$lib/functions";
   import { FuzzyAPI } from "$lib/functions";
   import { onMount } from "svelte";
@@ -81,7 +82,7 @@
           classify objects in videos. Simply upload a video, select a model, and
           let the magic happen!
         </p>
-        <button class="get-started-btn" onclick={navigateToApp}>
+        <button class="get-started-btn" onclick={navigateToApp} aria-label="Get started">
           Get Started
         </button>
       </div>
@@ -105,6 +106,7 @@
                 class="process-btn {processingVideo ? 'processing' : ''}"
                 onclick={handleProcessVideo}
                 disabled={processingVideo}
+                aria-label="Process Video"
               >
                 {#if processingVideo}
                   <span class="spinner-small"></span> Processing...
@@ -156,7 +158,7 @@
           <div class="divider"></div>
 
           <div class="upload-new-container">
-            <button class="upload-new-btn" onclick={handleUploadNew}>
+            <button class="upload-new-btn" onclick={handleUploadNew} aria-label="Upload new video">
               Upload New Video
             </button>
           </div>
@@ -168,6 +170,7 @@
   <footer>
     <p>Fuzzy Finder v0.0.1 &copy; 2025</p>
   </footer>
+  <LoadingOverlay visible={processingVideo} message="Processing video..." />
 </main>
 
 <style>
@@ -412,4 +415,15 @@
   }
 
   /* Add other styles from your original CSS here */
+
+  @media (max-width: 640px) {
+    .content {
+      padding: 1rem;
+    }
+
+    .video-player-container,
+    .upload-container {
+      max-width: 100%;
+    }
+  }
 </style>
