@@ -3,19 +3,26 @@ from __future__ import annotations
 # Standard library imports
 from dataclasses import dataclass
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Callable, TYPE_CHECKING
 
 # Third-party imports
 import cv2  # type: ignore
 import numpy as np  # type: ignore
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
+
+# Optional Flask-Limiter import with graceful fallback
 try:
     from flask_limiter import Limiter  # type: ignore
     from flask_limiter.util import get_remote_address  # type: ignore
 except ModuleNotFoundError:  # pragma: no cover
     Limiter = None  # type: ignore
-    get_remote_address = lambda *args, **kwargs: ""  # type: ignore
+
+# Static type checking support for Limiter
+if TYPE_CHECKING:
+    from flask_limiter import Limiter as LimiterType  # pragma: no cover
+else:
+    LimiterType = Any  # type: ignore
 from celery.result import AsyncResult  # type: ignore
 
 # Local application imports
@@ -40,11 +47,16 @@ __all__: List[str] = [
 
 app: Flask = Flask(__name__)
 CORS(app)
-# Rate limiter (100 req/hour per IP)
+# Instantiate rate limiter if the extension is available
+limiter: Optional[LimiterType] = None
 if Limiter is not None:
-    limiter: Limiter = Limiter(key_func=get_remote_address, app=app, default_limits=["100 per hour"])
-else:
-    limiter = None  # type: ignore
+    limiter = Limiter(key_func=get_remote_address, app=app, default_limits=["100 per hour"])
+
+# Helper decorator that becomes a no-op when limiter is unavailable
+def rate_limit_exempt(func: Callable[..., Response]) -> Callable[..., Response]:
+    if limiter is None:
+        return func
+    return limiter.exempt(func)  # type: ignore[arg-type]
 
 # ---------------------------------------------------------------------------
 # Detector registry -----------------------------------------------------------------
@@ -102,17 +114,15 @@ class YouTubeRequest:
 # Routes ---------------------------------------------------------------------
 
 @app.route("/", methods=["GET"])
-if Limiter is not None:
-    hello_world = limiter.exempt(hello_world)  # type: ignore
-def hello_world() -> Any:
+@rate_limit_exempt
+def hello_world() -> Response:
     """Simple ping route used by front-end to test connectivity."""
     return jsonify({"message": "Hello, World!"})
 
 
 @app.route("/health", methods=["GET"])
-if Limiter is not None:
-    health = limiter.exempt(health)  # type: ignore
-def health() -> Any:
+@rate_limit_exempt
+def health() -> Response:
     """Liveness probe for orchestration platforms."""
     return jsonify({"status": "ok"})
 
@@ -192,18 +202,16 @@ def process_youtube() -> Any:
 
 
 @app.route("/task-status/<task_id>", methods=["GET"])
-if Limiter is not None:
-    task_status = limiter.exempt(task_status)  # type: ignore
-def task_status(task_id: str) -> Any:
+@rate_limit_exempt
+def task_status(task_id: str) -> Response:
     """Return Celery task state and success boolean."""
     res: AsyncResult = AsyncResult(task_id)
     return jsonify({"task_id": task_id, "state": res.state, "successful": res.successful()})
 
 
 @app.route("/job-status/<int:job_id>", methods=["GET"])
-if Limiter is not None:
-    job_status = limiter.exempt(job_status)  # type: ignore
-def job_status(job_id: int) -> Any:
+@rate_limit_exempt
+def job_status(job_id: int) -> Response:
     """Legacy route for the in-memory dev queue."""
     return jsonify({"job_id": job_id, "status": get_status(job_id)})
 
@@ -211,6 +219,7 @@ def job_status(job_id: int) -> Any:
 from backend.redis_pool import get_redis
 
 @app.route("/broker-health", methods=["GET"])
+@rate_limit_exempt
 def broker_health() -> Response:
     """Check Redis connection health used by Celery broker."""
     try:
