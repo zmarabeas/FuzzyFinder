@@ -16,12 +16,16 @@ if Celery is None:
     raise RuntimeError("Celery is required but not installed. Install with `pip install celery redis`. ")
 
 import os
-from typing import Final
+from typing import Final, Any
+
+if Any is None:
+    raise RuntimeError("Celery is required but not installed. Install with `pip install celery redis`. ")
 
 BROKER_URL: Final[str] = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 BACKEND_URL: Final[str] = os.getenv("CELERY_RESULT_BACKEND", BROKER_URL)
 
-celery_app: Celery = Celery(
+# At runtime the symbol Celery is guaranteed (see guard above)
+celery_app: "Any" = Celery(
     "fuzzyfinder",
     broker=BROKER_URL,
     backend=BACKEND_URL,
