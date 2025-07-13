@@ -4,6 +4,7 @@ import tempfile
 import os
 import cv2
 import numpy as np
+from dataclasses import dataclass
 
 # Import our modules
 from models.resnet_detector import ResNetDetector
@@ -36,6 +37,13 @@ DETECTORS = {
     'temporal_faster_rcnn': lambda: TemporalDetector(FasterRCNNDetector(confidence_threshold=0.4), sequence_length=5),
     'temporal_ssd': lambda: TemporalDetector(SSDDetector(confidence_threshold=0.4), sequence_length=5),
 }
+
+
+@dataclass
+class YouTubeRequest:
+    """Payload schema for /process-youtube route."""
+    url: str
+    detector: str = 'yolo'
 
 @app.route('/process-video', methods=['POST'])
 def process_video():
@@ -106,15 +114,16 @@ def process_youtube():
     Expects JSON body with a 'url' field containing the YouTube video URL.
     Currently returns HTTP 501 (Not Implemented)."""
     data = request.get_json(force=True, silent=True) or {}
-    youtube_url = data.get('url')
+    req = YouTubeRequest(url=data.get('url', ''), detector=data.get('detector', 'yolo'))
 
-    if not youtube_url:
+    if not req.url:
         return jsonify({'error': 'Missing URL parameter'}), 400
 
-    # TODO: download YouTube video, extract frames, and run detection
+    # TODO: download YouTube video, extract frames, and run detection using req.detector
     return jsonify({
         'message': 'YouTube processing not implemented yet',
-        'url': youtube_url
+        'url': req.url,
+        'detector': req.detector
     }), 501
 
 @app.route('/available-detectors', methods=['GET'])

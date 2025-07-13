@@ -154,7 +154,7 @@
 
 <style>
   .uploader-container {
-    background-color: #3f4045; /* onyx */
+    background-color: var(--color-surface);
     border: 2px dashed rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     padding: 3rem 2rem;
@@ -164,8 +164,8 @@
   }
   
   .drag-active {
-    background-color: #413f54; /* english-violet */
-    border-color: #5f5aa2; /* ultra-violet */
+    background-color: var(--color-surface-alt);
+    border-color: var(--color-primary);
     transform: scale(1.01);
   }
   
@@ -189,7 +189,7 @@
     margin: 0;
     font-size: 1.5rem;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--color-text);
   }
   
   p {
@@ -200,7 +200,7 @@
   
   .browse-btn {
     margin-top: 1.5rem;
-    background-color: #5f5aa2; /* ultra-violet */
+    background-color: var(--color-primary);
     color: white;
     border: none;
     border-radius: 4px;
@@ -212,7 +212,7 @@
   }
   
   .browse-btn:hover {
-    background-color: #355691; /* yinmn-blue */
+    background-color: var(--color-primary-hover);
   }
   
   .upload-progress-container {
@@ -233,7 +233,7 @@
   
   .progress-bar {
     height: 100%;
-    background-color: #5f5aa2; /* ultra-violet */
+    background-color: var(--color-primary);
     border-radius: 4px;
     transition: width 0.3s ease;
   }

@@ -155,15 +155,15 @@
     padding: 0.5rem;
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 4px;
-    background-color: #3f4045;
-    color: #ffffff;
+    background-color: var(--color-surface);
+    color: var(--color-text);
     font-size: 1rem;
     cursor: pointer;
   }
 
   select:focus {
     outline: none;
-    border-color: #5f5aa2;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 2px rgba(95, 90, 162, 0.5);
   }
 
@@ -171,9 +171,9 @@
     margin-top: 0.75rem;
     font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.9);
-    background-color: #413f54;
+    background-color: var(--color-surface-alt);
     padding: 0.75rem;
     border-radius: 4px;
-    border-left: 3px solid #5f5aa2;
+    border-left: 3px solid var(--color-primary);
   }
 </style>

@@ -31,6 +31,13 @@ async function getAvailableDetectors(){
   return data;
 }
 
+/**
+ * @typedef {Object} YouTubeProcessResponse
+ * @property {string} message - status message
+ * @property {string} url - YouTube URL processed
+ * @property {string} detector - detector used (when implemented)
+ */
+
 export class FuzzyAPI{
   r = 'http://localhost:5005';
   constructor(route){
@@ -118,6 +125,12 @@ export class FuzzyAPI{
     }
   }
 
+  /**
+   * Send a YouTube URL for animal detection processing
+   * @param {string} youtubeUrl - The URL of the YouTube video
+   * @param {string} [detectorType='yolo'] - Detector type (optional)
+   * @returns {Promise<YouTubeProcessResponse>} Response payload
+   */
   async processYouTubeVideo(youtubeUrl, detectorType = 'yolo') {
     let route = '/process-youtube';
     route = this.serverRoute + route;

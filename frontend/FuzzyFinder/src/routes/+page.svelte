@@ -171,6 +171,15 @@
 </main>
 
 <style>
+  :global(:root) {
+    --color-bg: #30292f;
+    --color-surface: #3f4045;
+    --color-surface-alt: #413f54;
+    --color-primary: #5f5aa2;
+    --color-primary-hover: #355691;
+    --color-text: #ffffff;
+  }
+
   :global(body) {
     margin: 0;
     padding: 0;
@@ -186,8 +195,8 @@
       "Open Sans",
       "Helvetica Neue",
       sans-serif;
-    background-color: #30292f; /* raisin-black */
-    color: #ffffff;
+    background-color: var(--color-bg);
+    color: var(--color-text);
   }
 
   main {
@@ -197,7 +206,7 @@
   }
 
   header {
-    background-color: #413f54; /* english-violet */
+    background-color: var(--color-surface-alt);
     padding: 1.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
@@ -233,7 +242,7 @@
   .intro-container h2 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
-    color: #ffffff;
+    color: var(--color-text);
   }
 
   .intro-container p {
@@ -243,7 +252,7 @@
   }
 
   .get-started-btn {
-    background-color: #5f5aa2;
+    background-color: var(--color-primary);
     color: white;
     border: none;
     border-radius: 4px;
@@ -255,7 +264,7 @@
   }
 
   .get-started-btn:hover {
-    background-color: #355691;
+    background-color: var(--color-primary-hover);
   }
 
   .upload-container {
@@ -271,7 +280,7 @@
 
   .process-container {
     margin-top: 20px;
-    background-color: #3f4045;
+    background-color: var(--color-surface);
     border-radius: 8px;
     padding: 16px;
   }
@@ -285,7 +294,7 @@
   }
 
   .process-btn {
-    background-color: #5f5aa2;
+    background-color: var(--color-primary);
     color: white;
     border: none;
     border-radius: 4px;
@@ -301,7 +310,7 @@
   }
 
   .process-btn:hover:not(:disabled) {
-    background-color: #355691;
+    background-color: var(--color-primary-hover);
   }
 
   .process-btn:disabled {
@@ -310,7 +319,7 @@
   }
 
   .process-btn.processing {
-    background-color: #413f54;
+    background-color: var(--color-surface-alt);
   }
 
   .spinner-small {
@@ -350,7 +359,7 @@
   }
 
   .stat {
-    background-color: #413f54;
+    background-color: var(--color-surface-alt);
     padding: 12px;
     border-radius: 4px;
   }
@@ -379,7 +388,7 @@
   }
 
   .upload-new-btn {
-    background-color: #5f5aa2;
+    background-color: var(--color-primary);
     color: white;
     border: none;
     border-radius: 4px;
@@ -391,11 +400,11 @@
   }
 
   .upload-new-btn:hover {
-    background-color: #355691;
+    background-color: var(--color-primary-hover);
   }
 
   footer {
-    background-color: #413f54;
+    background-color: var(--color-surface-alt);
     padding: 1rem;
     text-align: center;
     font-size: 0.875rem;
