@@ -1,7 +1,3 @@
-from pathlib import Path
-import builtins
-import types
-
 import pytest  # type: ignore
 
 from backend.utils.youtube_downloader import (

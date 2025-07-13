@@ -15,6 +15,7 @@ from models.ssd_detector import SSDDetector
 from models.mobilenet_detector import MobileNetDetector
 from utils.video_processor import extract_frames, find_animal_segments
 from utils.youtube_downloader import download_youtube_video, InvalidYouTubeURLError, YouTubeDownloadError
+from backend.task_queue import enqueue, get_status, start_background_worker
 
 app = Flask(__name__)
 CORS(app)
@@ -122,21 +123,19 @@ def process_youtube():
 
     # TODO: download YouTube video, extract frames, and run detection using req.detector
     try:
-        video_path = download_youtube_video(req.url)
+        job_id = enqueue(lambda: download_youtube_video(req.url))
+        # Immediately respond with job id; client polls /job-status
+        return jsonify({'job_id': job_id, 'status': 'queued'}), 202
     except InvalidYouTubeURLError as e:
         return jsonify({'error': str(e)}), 400
     except YouTubeDownloadError as e:
         return jsonify({'error': str(e)}), 502
 
-    # Placeholder: we have the video_path but detection not yet implemented
-    # Ensure temporary file is removed later
-    os.unlink(video_path)
 
-    return jsonify({
-        'message': 'YouTube video downloaded; detection pipeline not yet implemented',
-        'url': req.url,
-        'detector': req.detector
-    }), 202
+@app.route('/job-status/<int:job_id>', methods=['GET'])
+def job_status(job_id: int):
+    """Return status string for given job id"""
+    return jsonify({'job_id': job_id, 'status': get_status(job_id)})
 
 @app.route('/available-detectors', methods=['GET'])
 def available_detectors():
@@ -152,5 +151,6 @@ def health():
     return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
+    start_background_worker()
     # app.run(debug=True, host='0.0.0.0', port=5000)
     app.run(port=5005)

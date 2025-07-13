@@ -87,6 +87,20 @@ export class FuzzyAPI{
   }
 
   /**
+   * Get job status from backend
+   * @param {number} jobId
+   * @returns {Promise<{job_id:number,status:string}>}
+   */
+  async getJobStatus(jobId){
+    let route = `/job-status/${jobId}`;
+    route = this.serverRoute + route;
+
+    const response = await fetch(route);
+    if(!response.ok) throw new Error(`Failed to fetch job status ${response.status}`);
+    return response.json();
+  }
+
+  /**
    * Function to send a video file for animal detection processing
    * @param {File} videoFile - The video file to process
    * @param {string} detectorType - The type of detector to use (e.g., 'yolo', 'resnet', 'temporal_yolo')

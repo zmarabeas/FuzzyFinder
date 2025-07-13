@@ -7,10 +7,11 @@ def patch_downloader(monkeypatch):
     """Patch download_youtube_video to avoid external network calls during tests."""
     from backend.utils import youtube_downloader
 
-    def _fake_download(url):
-        return '/tmp/fake-video.mp4'
-
-    monkeypatch.setattr(youtube_downloader, 'download_youtube_video', _fake_download)
+    monkeypatch.setattr(
+        youtube_downloader,
+        'download_youtube_video',
+        lambda url: '/tmp/fake-video.mp4'
+    )
 
 
 @pytest.fixture
@@ -49,4 +50,5 @@ def test_process_youtube_not_implemented(client):
     # Depending on environment network, we mock to skip download in unit tests; here assume 202 or 502.
     assert response.status_code in (202, 502)
     data = response.get_json()
-    assert data["url"] == payload["url"]
+    assert "job_id" in data
+    assert data["status"] == 'queued'

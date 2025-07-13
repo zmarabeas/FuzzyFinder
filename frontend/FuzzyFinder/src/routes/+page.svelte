@@ -65,7 +65,9 @@
   });
 </script>
 
-<main>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<main id="main-content">
   <header>
     <div class="logo">
       <h1>Fuzzy Finder</h1>
@@ -425,5 +427,20 @@
     .upload-container {
       max-width: 100%;
     }
+  }
+
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--color-primary);
+    color: #fff;
+    padding: 8px 16px;
+    z-index: 100;
+    transition: top 0.2s ease;
+  }
+
+  .skip-link:focus {
+    top: 0;
   }
 </style>

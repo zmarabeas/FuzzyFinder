@@ -29,6 +29,15 @@ describe('FuzzyAPI', () => {
     expect(fetchMock).toHaveBeenCalledWith('http://localhost:1234/process-youtube', expect.any(Object));
   });
 
+  it('should fetch job status', async () => {
+    const api = new FuzzyAPI('http://localhost');
+    const mockResponse = { job_id: 1, status: 'completed' };
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(mockResponse) });
+
+    const res = await api.getJobStatus(1);
+    expect(res.status).toBe('completed');
+  });
+
   afterEach(() => {
     // @ts-ignore
     delete global.fetch;

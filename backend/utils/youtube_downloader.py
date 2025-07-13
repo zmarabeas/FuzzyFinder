@@ -2,7 +2,10 @@ import re
 import tempfile
 import os
 from pathlib import Path
-from pytube import YouTube  # type: ignore
+try:
+    from pytube import YouTube  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover
+    YouTube = None  # type: ignore
 
 from .exceptions import InvalidYouTubeURLError, YouTubeDownloadError
 
@@ -23,6 +26,9 @@ def download_youtube_video(url: str) -> Path:
         raise InvalidYouTubeURLError(f"Invalid YouTube URL: {url}")
 
     try:
+        if YouTube is None:
+            raise YouTubeDownloadError("pytube library not installed")
+
         yt = YouTube(url)
         stream = yt.streams.filter(progressive=True, file_extension="mp4").order_by('resolution').desc().first()
         if stream is None:
