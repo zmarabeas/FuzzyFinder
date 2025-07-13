@@ -1,3 +1,5 @@
+# pyright: reportMissingImports=false
+
 from __future__ import annotations
 
 """Celery application instance.
@@ -24,7 +26,10 @@ else:
 BROKER_URL: Final[str] = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 BACKEND_URL: Final[str] = os.getenv("CELERY_RESULT_BACKEND", BROKER_URL)
 
-# At runtime the symbol Celery is guaranteed (see guard above)
+# At runtime Celery must be available; raise clear error otherwise
+if Celery is None:
+    raise RuntimeError("Celery package not installed. Install with `pip install celery redis`. ")
+
 celery_app: "CeleryType" = Celery(
     "fuzzyfinder",
     broker=BROKER_URL,
