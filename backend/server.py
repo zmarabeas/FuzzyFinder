@@ -5,6 +5,10 @@ import os
 import cv2
 import numpy as np
 from dataclasses import dataclass
+from flask_limiter import Limiter  # type: ignore
+from flask_limiter.util import get_remote_address  # type: ignore
+
+from celery.result import AsyncResult  # type: ignore
 
 # Import our modules
 from models.resnet_detector import ResNetDetector
@@ -16,9 +20,12 @@ from models.mobilenet_detector import MobileNetDetector
 from utils.video_processor import extract_frames, find_animal_segments
 from utils.youtube_downloader import download_youtube_video, InvalidYouTubeURLError, YouTubeDownloadError
 from backend.task_queue import enqueue, get_status, start_background_worker
+from backend.tasks import process_youtube as celery_process_youtube
 
 app = Flask(__name__)
 CORS(app)
+# Rate limiter (100 requests per hour per IP)
+limiter = Limiter(key_func=get_remote_address, app=app, default_limits=["100 per hour"])
 
 ''' Test route '''
 @app.route('/', methods=['GET'])
@@ -123,9 +130,8 @@ def process_youtube():
 
     # TODO: download YouTube video, extract frames, and run detection using req.detector
     try:
-        job_id = enqueue(lambda: download_youtube_video(req.url))
-        # Immediately respond with job id; client polls /job-status
-        return jsonify({'job_id': job_id, 'status': 'queued'}), 202
+        celery_async_result = celery_process_youtube.apply_async(args=[req.url, req.detector])
+        return jsonify({'task_id': celery_async_result.id, 'status': 'queued'}), 202
     except InvalidYouTubeURLError as e:
         return jsonify({'error': str(e)}), 400
     except YouTubeDownloadError as e:
@@ -136,6 +142,13 @@ def process_youtube():
 def job_status(job_id: int):
     """Return status string for given job id"""
     return jsonify({'job_id': job_id, 'status': get_status(job_id)})
+
+@app.route('/task-status/<task_id>', methods=['GET'])
+@limiter.exempt
+def task_status(task_id: str):
+    """Return Celery task status."""
+    res = AsyncResult(task_id)
+    return jsonify({'task_id': task_id, 'state': res.state, 'successful': res.successful()})
 
 @app.route('/available-detectors', methods=['GET'])
 def available_detectors():
