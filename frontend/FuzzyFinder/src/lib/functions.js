@@ -118,6 +118,37 @@ export class FuzzyAPI{
     }
   }
 
+  async processYouTubeVideo(youtubeUrl, detectorType = 'yolo') {
+    let route = '/process-youtube';
+    route = this.serverRoute + route;
+
+    const payload = {
+      url: youtubeUrl,
+      detector: detectorType
+    };
+
+    try {
+      const response = await fetch(route, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server responded with ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Error processing YouTube video:', error);
+      throw error;
+    }
+  }
+
   
 }
 

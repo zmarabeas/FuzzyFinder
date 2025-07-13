@@ -153,26 +153,27 @@
   select {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 4px;
-    background-color: white;
+    background-color: #3f4045;
+    color: #ffffff;
     font-size: 1rem;
     cursor: pointer;
   }
 
   select:focus {
     outline: none;
-    border-color: #4299e1;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+    border-color: #5f5aa2;
+    box-shadow: 0 0 0 2px rgba(95, 90, 162, 0.5);
   }
 
   .model-description {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
     font-size: 0.875rem;
-    color: #555;
-    background-color: #f5f5f5;
+    color: rgba(255, 255, 255, 0.9);
+    background-color: #413f54;
     padding: 0.75rem;
     border-radius: 4px;
-    border-left: 3px solid #4299e1;
+    border-left: 3px solid #5f5aa2;
   }
 </style>

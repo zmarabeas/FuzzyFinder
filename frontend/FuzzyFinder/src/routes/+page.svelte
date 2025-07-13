@@ -12,6 +12,7 @@
   let processingVideo = $state(false);
   let processedResults = $state(null);
   let processingError = $state(null);
+  let showIntro = $state(true);
 
   const api = new FuzzyAPI();
 
@@ -46,6 +47,10 @@
     }
   }
 
+  function navigateToApp() {
+    showIntro = false;
+  }
+
   onMount(async () => {
     // Test API connections
     try {
@@ -68,81 +73,95 @@
   </header>
 
   <section class="content">
-    {#if !isVideoUploaded}
-      <div class="upload-container">
-        <VideoUploader fileUploaded={handleFileUploaded} />
+    {#if showIntro}
+      <div class="intro-container">
+        <h2>Welcome to Fuzzy Finder</h2>
+        <p>
+          This application uses advanced computer vision models to detect and
+          classify objects in videos. Simply upload a video, select a model, and
+          let the magic happen!
+        </p>
+        <button class="get-started-btn" onclick={navigateToApp}>
+          Get Started
+        </button>
       </div>
     {:else}
-      <div class="video-player-container">
-        <VideoPlayer
-          {videoFile}
-          animalSegments={processedResults?.animal_segments || []}
-        />
+      {#if !isVideoUploaded}
+        <div class="upload-container">
+          <VideoUploader fileUploaded={handleFileUploaded} />
+        </div>
+      {:else}
+        <div class="video-player-container">
+          <VideoPlayer
+            {videoFile}
+            animalSegments={processedResults?.animal_segments || []}
+          />
 
-        <div class="process-container">
-          <div class="model-section">
-            <ModelSelector bind:selectedModel />
+          <div class="process-container">
+            <div class="model-section">
+              <ModelSelector bind:selectedModel />
 
-            <button
-              class="process-btn {processingVideo ? 'processing' : ''}"
-              onclick={handleProcessVideo}
-              disabled={processingVideo}
-            >
-              {#if processingVideo}
-                <span class="spinner-small"></span> Processing...
-              {:else}
-                Process Video
-              {/if}
-            </button>
-          </div>
-
-          {#if processingError}
-            <div class="error-message">
-              {processingError}
+              <button
+                class="process-btn {processingVideo ? 'processing' : ''}"
+                onclick={handleProcessVideo}
+                disabled={processingVideo}
+              >
+                {#if processingVideo}
+                  <span class="spinner-small"></span> Processing...
+                {:else}
+                  Process Video
+                {/if}
+              </button>
             </div>
-          {/if}
 
-          {#if processedResults}
-            <div class="results-summary">
-              <h3>Processing Results</h3>
-              <div class="results-stats">
-                <div class="stat">
-                  <span class="stat-label">Detected Segments:</span>
-                  <span class="stat-value"
-                    >{processedResults.animal_segments.length}</span
-                  >
-                </div>
-                <div class="stat">
-                  <span class="stat-label">Detector:</span>
-                  <span class="stat-value"
-                    >{processedResults.metadata.detector}</span
-                  >
-                </div>
-                <div class="stat">
-                  <span class="stat-label">Video Duration:</span>
-                  <span class="stat-value"
-                    >{processedResults.metadata.duration.toFixed(2)}s</span
-                  >
-                </div>
-                <div class="stat">
-                  <span class="stat-label">Frames Processed:</span>
-                  <span class="stat-value"
-                    >{processedResults.frames.length}</span
-                  >
+            {#if processingError}
+              <div class="error-message">
+                {processingError}
+              </div>
+            {/if}
+
+            {#if processedResults}
+              <div class="results-summary">
+                <h3>Processing Results</h3>
+                <div class="results-stats">
+                  <div class="stat">
+                    <span class="stat-label">Detected Segments:</span>
+                    <span class="stat-value"
+                      >{processedResults.animal_segments.length}</span
+                    >
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">Detector:</span>
+                    <span class="stat-value"
+                      >{processedResults.metadata.detector}</span
+                    >
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">Video Duration:</span>
+                    <span class="stat-value"
+                      >{processedResults.metadata.duration.toFixed(2)}s</span
+                    >
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">Frames Processed:</span>
+                    <span class="stat-value"
+                      >{processedResults.frames.length}</span
+                    >
+                  </div>
                 </div>
               </div>
-            </div>
-          {/if}
-        </div>
+            {/if}
+          </div>
 
-        <div class="divider"></div>
+          <div class="divider"></div>
 
-        <div class="upload-new-container">
-          <button class="upload-new-btn" onclick={handleUploadNew}>
-            Upload New Video
-          </button>
+          <div class="upload-new-container">
+            <button class="upload-new-btn" onclick={handleUploadNew}>
+              Upload New Video
+            </button>
+          </div>
         </div>
-      </div>
+      {/if}
     {/if}
   </section>
 
@@ -202,6 +221,41 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
+  }
+
+  .intro-container {
+    text-align: center;
+    padding: 4rem 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .intro-container h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #ffffff;
+  }
+
+  .intro-container p {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2rem;
+  }
+
+  .get-started-btn {
+    background-color: #5f5aa2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .get-started-btn:hover {
+    background-color: #355691;
   }
 
   .upload-container {

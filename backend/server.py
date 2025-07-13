@@ -98,6 +98,25 @@ def process_video():
         # Clean up temp file
         os.unlink(temp_file.name)
 
+# Added stub endpoint for YouTube processing
+
+@app.route('/process-youtube', methods=['POST'])
+def process_youtube():
+    """Placeholder route to process YouTube videos for animal detection.
+    Expects JSON body with a 'url' field containing the YouTube video URL.
+    Currently returns HTTP 501 (Not Implemented)."""
+    data = request.get_json(force=True, silent=True) or {}
+    youtube_url = data.get('url')
+
+    if not youtube_url:
+        return jsonify({'error': 'Missing URL parameter'}), 400
+
+    # TODO: download YouTube video, extract frames, and run detection
+    return jsonify({
+        'message': 'YouTube processing not implemented yet',
+        'url': youtube_url
+    }), 501
+
 @app.route('/available-detectors', methods=['GET'])
 def available_detectors():
     """Get list of available detectors"""
