@@ -19,7 +19,7 @@ from models.ssd_detector import SSDDetector
 from models.mobilenet_detector import MobileNetDetector
 from utils.video_processor import extract_frames, find_animal_segments
 from utils.youtube_downloader import download_youtube_video, InvalidYouTubeURLError, YouTubeDownloadError
-from backend.task_queue import enqueue, get_status, start_background_worker
+from backend.task_queue import get_status
 from backend.tasks import process_youtube as celery_process_youtube
 
 app = Flask(__name__)
@@ -164,6 +164,5 @@ def health():
     return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
-    start_background_worker()
     # app.run(debug=True, host='0.0.0.0', port=5000)
     app.run(port=5005)
