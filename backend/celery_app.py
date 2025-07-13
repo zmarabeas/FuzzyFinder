@@ -12,20 +12,20 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     Celery = None  # type: ignore
 
-if Celery is None:
-    raise RuntimeError("Celery is required but not installed. Install with `pip install celery redis`. ")
-
 import os
-from typing import Final, Any
+from typing import Final, TYPE_CHECKING, Any
 
-if Any is None:
-    raise RuntimeError("Celery is required but not installed. Install with `pip install celery redis`. ")
+if TYPE_CHECKING:
+    from celery import Celery as CeleryType  # pragma: no cover
+else:
+    CeleryType = Any  # type: ignore
+
 
 BROKER_URL: Final[str] = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 BACKEND_URL: Final[str] = os.getenv("CELERY_RESULT_BACKEND", BROKER_URL)
 
 # At runtime the symbol Celery is guaranteed (see guard above)
-celery_app: "Any" = Celery(
+celery_app: "CeleryType" = Celery(
     "fuzzyfinder",
     broker=BROKER_URL,
     backend=BACKEND_URL,
