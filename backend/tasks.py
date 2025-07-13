@@ -3,7 +3,7 @@ from __future__ import annotations
 """Celery task definitions for the backend."""
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import os
 
@@ -12,8 +12,8 @@ from backend.utils.youtube_downloader import download_youtube_video
 from backend.utils.video_processor import extract_frames, find_animal_segments
 from backend.server import DETECTORS  # reuse factory
 
-@celery_app.task(name="tasks.process_youtube")
-def process_youtube(url: str, detector_name: str = "yolo") -> Dict[str, object]:
+@celery_app.task(bind=True, acks_late=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 3})
+def process_youtube(self, url: str, detector_name: str = "yolo") -> Dict[str, Any]:
     """Download a YouTube video, run detection, and return results.
 
     Parameters
