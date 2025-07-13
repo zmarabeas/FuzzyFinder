@@ -7,7 +7,11 @@ import os
 from typing import Any, Dict, List, Optional, Callable, TYPE_CHECKING
 
 # Third-party imports
-import cv2  # type: ignore
+# Optional OpenCV import (used by video processing utils)
+try:
+    import cv2  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover
+    cv2 = None  # type: ignore  # noqa: N816
 import numpy as np  # type: ignore
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
